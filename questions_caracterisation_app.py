@@ -8,27 +8,20 @@ Created on Tue Jul 30 14:00:14 2019
 # %%
 import time
 import sys
-import re
 import os.path as os_path
 
 import pandas as pd
 import numpy as np
-import logging
 import pickle
-import operator
 
+from flask import Flask, render_template, request
 from nltk import word_tokenize, RegexpTokenizer 
-from matplotlib import pyplot as plt
-from sklearn import model_selection as model_selection
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.manifold import TSNE
-from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score
-from sklearn.feature_selection import SelectFromModel
 
+# %%
+app = Flask(__name__)
+
+# %%
 # finding and loading the module PATHS
 PCKG_PTH = os_path.abspath(os_path.join('../'))  # necessary absolute path
 PCKG_PTH_EXPLRTN = os_path.abspath(\
@@ -47,3 +40,24 @@ for pckg in PCKG_PTH:
         sys.path.append(pckg)
 print()        
 print(f"sys.path:\n{sys.path}\n")
+
+# %%
+# nltk.download('punkt')
+DATA = f"data/data_p6/"
+PTH_DT = '../' + DATA
+nan = NAN = np.nan  # WHoa!!
+
+# %%
+# Cleaning
+
+# %%
+
+# Random Forest Classification
+n_estimators = 50
+max_depth = 100
+
+rf = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth,
+                            n_jobs=-1)
+
+ovr_tagging_rf = OneVsRestTagging(df_encoded_questions_unique, N_SPLITS,
+                                  matrx_tfidf, rf, 'rf')
