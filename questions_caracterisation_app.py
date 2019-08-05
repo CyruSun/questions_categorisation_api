@@ -41,8 +41,7 @@ import data_cleaning_categorisation as clean
 
 # %%
 # nltk.download('punkt')
-DATA = f"data/"
-PTH_DT = '../' + DATA
+PATH_DATA = './data/'
 nan = NAN = np.nan  # WHoa!!
 TOKENIZER = RegexpTokenizer(r'[\w+(?=+)]*')
 
@@ -117,7 +116,8 @@ def home():
 @app.route('/form')
 def form():
     form_title = 'form of the question'
-    return render_template('form.html', form_title=form_title)
+    nb_cols = 80
+    return render_template('form.html', form_title=form_title, nb_cols=nb_cols)
 
 # %%
 @app.route('/result_tags')
@@ -132,11 +132,11 @@ def binarize_df(df_complete, tokenizer=TOKENIZER):
     df_complete -- dataframe to encode
     """
     # loading
-    with open(PTH_DT + 'unwanted.pkl', 'rb') as p:
+    with open(PATH_DATA + 'unwanted.pkl', 'rb') as p:
         unwanted = pickle.load(p)
-    with open(PTH_DT + 'st_match_words.pkl', 'rb') as p:
+    with open(PATH_DATA + 'st_match_words.pkl', 'rb') as p:
         st_match_words = pickle.load(p)
-    with open(PTH_DT + 'st_matching_words_2.pkl', 'rb') as p:
+    with open(PATH_DATA + 'st_matching_words_2.pkl', 'rb') as p:
         st_matching_words_2 = pickle.load(p)
     # Join the Title and Body strings
     df_complete['Joint_Question_Words'] = df_complete[
@@ -206,13 +206,13 @@ def binarize_df(df_complete, tokenizer=TOKENIZER):
 def send(tokenizer=TOKENIZER):
     if request.method == 'POST':
         # loading
-        with open(PTH_DT + 'df.pkl', 'rb') as p:
+        with open(PATH_DATA + 'df.pkl', 'rb') as p:
             df = pickle.load(p)
-        with open(PTH_DT + 'tfidf_stopwords.pkl', 'rb') as p:
+        with open(PATH_DATA + 'tfidf_stopwords.pkl', 'rb') as p:
             tfidf_stopwords = pickle.load(p)
 
         df_encoded_questions_unique = pd.read_csv(
-                PTH_DT + 'df_encoded_questions_unique.csv', sep='\t',
+                PATH_DATA + 'df_encoded_questions_unique.csv', sep='\t',
                 low_memory=False)
         df_encoded_questions_unique.rename(index=df_encoded_questions_unique[
                 'Unnamed: 0'], inplace=True)
