@@ -14,7 +14,7 @@ import numpy as np
 import pickle
 
 from nltk import RegexpTokenizer
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import model_selection as model_selection
 from sklearn.multiclass import OneVsRestClassifier
@@ -106,9 +106,23 @@ class OneVsRestTagging:
         return set(hi_tags)
 
 # %%
-@app.route('/')  # décorateur permets d'entrer des métadonnées
+@app.route('/')
 def home():
-    return render_template(url_for('templates', 'home.html'))
+    home_title = 'Stackoverflow questions tagging API'
+    abstract = 'API that returns 5 tags onto a question. The inputs are the\
+    title and the body of the question.'
+    return render_template('home.html', home_title=home_title,
+                           abstract=abstract)
+# %%
+@app.route('/form')
+def form():
+    form_title = 'form of the question'
+    return render_template('form.html', form_title=form_title)
+
+# %%
+@app.route('/result_tags')
+def result_tags():
+    return render_template('result_tags.html')
 
 # %%
 @timer
@@ -247,9 +261,8 @@ def send(tokenizer=TOKENIZER):
                                           matrx_tfidf, rf)
         hi_tags = ovr_tagging_rf.tag_questions_OvR()
 
-        return render_template(url_for('templates', 'result_tags.html'),
-                               tags=hi_tags)
-    return render_template(url_for('templates', 'form.html'))
+        return render_template('result_tags.html', tags=hi_tags)
+    return render_template('form.html')
 
 
 # %%
