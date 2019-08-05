@@ -37,7 +37,7 @@ print(f"sys.path:\n{sys.path}\n")
 # Import modules from added path
 from time_relate import timer
 import morphing as mrphng
-import data_cleaning as clean
+import data_cleaning_categorisation as clean
 
 # %%
 # nltk.download('punkt')
