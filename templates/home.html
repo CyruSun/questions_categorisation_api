@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>{{ home_title }}</title>
+    </head>
+        <h1>{{ home_title }}</h1>
+        <p>
+        	<big>
+                <em>{{ abstract }}</em>.
+        	</big>
+    	</p>
+
+        
+        <h2>Inputs:</h2>
+        <p>
+            <ul>
+                <li>Title</li>
+                <li>Body</li>
+            </ul>
+        </p>
+		<p>
+            <big>
+                <a href={{ url_for('result_tags') }}><mark><strong>Link to the API</strong> </mark></a>.
+                <br />
+            </big>
+        </p>
+    </body>
+</html>

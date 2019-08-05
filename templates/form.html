@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>form of the question</title>
+    	<meta charset="utf-8" />
+    	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    </head>
+	<body>
+        <h1>Question tagging</h1>
+        <p>
+        	<big>
+        		<br />Enter the question:
+        	</big>
+    	</p>
+        <form method="POST" action="/send">
+					<big>
+						Question title:
+					</big>
+					<br />
+        			<textarea id="question_title" type="text" name="q_title" rows="2"
+					cols="120">
+					</textarea>
+					
+        		</p>
+        		<p>
+        			<big> 
+						Question body:
+					</big>
+					<br />
+					<textarea id="question_body" type="text" name="q_body" rows="24"
+					cols="120">
+					</textarea>
+        		</p>	
+        	</div>
+        	<p>
+        	<input class="btn btn-primary" type="submit" value="submit">
+        	</p>
+        	<p>
+				<a href={{ url_for('home') }}>
+					<mark>
+							<em>home</em>
+					</mark>
+				</a>
+			</p>
+        </form>
+    </body>
+</html>
