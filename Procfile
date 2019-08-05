@@ -1,0 +1,1 @@
+web: gunicorn questions_caracterisation_app:app
