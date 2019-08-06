@@ -253,7 +253,7 @@ def send(tokenizer=TOKENIZER):
         matrx_tfidf = tfidf.fit_transform(ls_joint_matching)
         # Random forest classification
         N_ESTIMATORS = 50
-        MAX_DEPTH = 100
+        MAX_DEPTH = 50
         N_SPLITS = 5
         rf = RandomForestClassifier(n_estimators=N_ESTIMATORS, n_jobs=-1,
                                     max_depth=MAX_DEPTH)
