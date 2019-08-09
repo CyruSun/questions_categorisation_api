@@ -43,7 +43,7 @@ import data_cleaning_categorisation as clean
 # nltk.download('punkt')
 PATH_DATA = './data/'
 nan = NAN = np.nan  # WHoa!!
-TOKENIZER = RegexpTokenizer(r'[\w+(?=+)]*')
+tokenizer = RegexpTokenizer(r'[\w+(?=+)]*')
 
 
 # %%
@@ -59,7 +59,6 @@ class OneVsRestTagging:
         n_splits -- number of train/test data split for cross validation
         predictors -- explanatory variables
         estimator -- classifier
-        last_ind -- index of input question at the last df row
         """
 
         self.target_val = df_target_val
@@ -71,31 +70,31 @@ class OneVsRestTagging:
         # Probabilities out of the estimators predictions
         self.proba = []
 
-        self.last_ind = df_target_val.index[-1] + 1
-
     @timer
-    def tag_questions_OvR(self):
+    def tag_questions_OvR(self, x_topredict, folded=False):
         """Return the tags for each questions and determining the
         matching performance of the estimator."""
+        if folded:
+            # Partition
+            kf = model_selection.KFold(n_splits=self.n_splits)
+            # Extracting the last train/test indexes
+            fold_indexes = [(train_index, test_index) for train_index,
+                            test_index in kf.split(self.predictors)]
 
-        # Partition
-        kf = model_selection.KFold(n_splits=self.n_splits)
-        # Extracting the last train/test indexes
-        fold_indexes = [(train_index, test_index) for train_index,
-                        test_index in kf.split(self.predictors)]
-
-        # Split data in train/test sets
-        last_train_index = fold_indexes[self.n_splits-1][0]
-        last_test_index = fold_indexes[self.n_splits-1][1]
-        X_train, X_test = self.predictors[last_train_index],\
-            self.predictors[last_test_index]
-        y_train, _ = self.target_val.iloc[last_train_index, :],\
-            self.target_val.iloc[last_test_index, :]
+            # Split data in train/test sets
+            last_train_index = fold_indexes[self.n_splits-1][0]
+            last_test_index = fold_indexes[self.n_splits-1][1]
+            X_train, _ = self.predictors[last_train_index],\
+                self.predictors[last_test_index]
+            y_train, _ = self.target_val.iloc[last_train_index, :],\
+                self.target_val.iloc[last_test_index, :]
+        else:
+            X_train, y_train = self.predictors, self.target_val
 
         # One vs Rest
         ovr = OneVsRestClassifier(self.estimator, n_jobs=-1).fit(X_train,
                                                                  y_train)
-        self.proba = ovr.predict_proba(X_test)
+        self.proba = ovr.predict_proba(x_topredict)
 
         # Tagging the question
         # Index of the 5 highest proba
@@ -126,7 +125,7 @@ def result_tags():
 
 # %%
 @timer
-def binarize_df(df_complete, tokenizer=TOKENIZER):
+def binarize_df(df_complete, tokenizer=tokenizer):
     """Binarization of a dataframe.
     Keyword arguments:
     df_complete -- dataframe to encode
@@ -203,14 +202,13 @@ def binarize_df(df_complete, tokenizer=TOKENIZER):
 
 # %%
 @app.route('/send', methods=['GET', 'POST'])
-def send(tokenizer=TOKENIZER):
+def send(tokenizer=tokenizer):
     if request.method == 'POST':
         # loading
-        with open(PATH_DATA + 'df.pkl', 'rb') as p:
-            df = pickle.load(p)
+        with open(PATH_DATA + 'df_origin_filled_final.pkl', 'rb') as p:
+            df_origin_filled_final = pickle.load(p)
         with open(PATH_DATA + 'tfidf_stopwords.pkl', 'rb') as p:
             tfidf_stopwords = pickle.load(p)
-
         df_encoded_questions_unique = pd.read_csv(
                 PATH_DATA + 'df_encoded_questions_unique.csv', sep='\t',
                 low_memory=False)
@@ -220,8 +218,11 @@ def send(tokenizer=TOKENIZER):
         df_encoded_questions_unique.rename(index=df_encoded_questions_unique[
             'Unnamed: 0'], inplace=True)
         del(df_encoded_questions_unique['Unnamed: 0'])
-        columns = list(df.columns)
-        add_ind = df.index[-1] + 1
+
+        N_ESTIMATORS = 50
+        MAX_DEPTH = 100
+        columns = list(df_origin_filled_final.columns)
+        add_ind = df_origin_filled_final.index[-1] + 1
         q_title = request.form['q_title']
         q_body = request.form['q_body']
 
@@ -232,8 +233,7 @@ def send(tokenizer=TOKENIZER):
         df_input = pd.DataFrame(
                 np.array([[q_title, {}, q_body, NAN, {}, {}, {}]]),
                 index=[add_ind], columns=columns)
-        df_complete = pd.concat([df, df_input])
-        # All characters
+        df_complete = pd.concat([df_origin_filled_final, df_input])
 
         # Replace the NAN float type values
         df_complete.replace(NAN, '', regex=True, inplace=True)
@@ -246,20 +246,26 @@ def send(tokenizer=TOKENIZER):
                 [df_encoded_questions_unique, df_input_encoded],
                 axis=0, sort=True)
         df_encoded_complete.fillna(value=int(0), inplace=True)
+
         # tf-idf
         ls_joint_matching = [" ".join(ls) for ls in ls_matching]
         tfidf = TfidfVectorizer(tokenizer=tokenizer.tokenize,
                                 stop_words=tfidf_stopwords)
         matrx_tfidf = tfidf.fit_transform(ls_joint_matching)
+
+        row, col = matrx_tfidf.shape
+        tfidf_input = matrx_tfidf[-1]
+
         # Random forest classification
-        N_ESTIMATORS = 50
-        MAX_DEPTH = 50
-        N_SPLITS = 5
+        sr_target = df_encoded_complete.iloc[-1, :]
+        target_index = list(sr_target.index)
+        target_val = mrphng.reshape_one_sample(sr_target.values)
+        df_target = pd.DataFrame(target_val, columns=target_index)
+
         rf = RandomForestClassifier(n_estimators=N_ESTIMATORS, n_jobs=-1,
                                     max_depth=MAX_DEPTH)
-        ovr_tagging_rf = OneVsRestTagging(df_encoded_complete, N_SPLITS,
-                                          matrx_tfidf, rf)
-        hi_tags = ovr_tagging_rf.tag_questions_OvR()
+        ovr_tagging_rf = OneVsRestTagging(df_target, tfidf_input, rf)
+        hi_tags = ovr_tagging_rf.tag_questions_OvR(tfidf_input)
 
         return render_template('result_tags.html', tags=hi_tags)
     return render_template('form.html')
