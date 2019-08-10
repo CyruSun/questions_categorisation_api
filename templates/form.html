@@ -7,34 +7,49 @@
     </head>
 	<body>
         <h1>Question tagging</h1>
-        <p>
-        	<big>
-        		<br />Enter the question:
-        	</big>
-    	</p>
+        <h2>Enter the question:</h2>
         <form method="POST" action="/send">
-				<p>
-					<big>
-						Question title:
-					</big>
-					<br />
-        			<textarea id="question_title" type="text" name="q_title" rows="2"
-					cols={{ nb_cols }}>
-					</textarea>	
-        		</p>
-        		<p>
-        			<big> 
-						Question body:
-					</big>
-					<br />
-					<textarea id="question_body" type="text" name="q_body" rows="11"
-					cols={{ nb_cols }}>
-					</textarea>
-        		</p>	
-        	</div>
+			<p>
+				<big>
+					Question title:
+				</big>
+				<br />
+				<textarea id="question_title" type="text" name="q_title" rows="2"
+				cols={{ nb_cols }}>
+				</textarea>	
+			</p>
+			<p>
+				<big> 
+					Question body:
+				</big>
+				<br />
+				<textarea id="question_body" type="text" name="q_body" rows="11"
+				cols={{ nb_cols }}>
+				</textarea>
+			</p>
         	<p>
         	<input class="btn btn-primary" type="submit" value="submit">
         	</p>
+			<p>
+				<big>
+					Question title:
+				</big>
+				<br />
+				{{ q_title }}>
+			</p>
+			<p>
+				<big>Question body:</big>
+				<br />
+				{{ q_body }}>
+			</p>
+		<h2>Output tags</h2>
+		<p>
+			<big>
+				Predicted tags:
+				<br/>
+				<strong>{{ tags }}</strong>
+			</big>
+		</p>
         	<p>
 				<a href={{ url_for('home') }}>
 					<mark>

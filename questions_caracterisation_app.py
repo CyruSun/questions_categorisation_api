@@ -267,7 +267,8 @@ def send(tokenizer=tokenizer):
         ovr_tagging_rf = OneVsRestTagging(df_target, tfidf_input, rf)
         hi_tags = ovr_tagging_rf.tag_questions_OvR(tfidf_input)
 
-        return render_template('result_tags.html', tags=hi_tags)
+        return render_template('form.html', tags=hi_tags, q_title=q_title,
+                               q_body=q_body)
     return render_template('form.html')
 
 
