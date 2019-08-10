@@ -52,7 +52,7 @@ class OneVsRestTagging:
 
     from sklearn.model_selection import cross_validate
 
-    def __init__(self, df_target_val, n_splits, predictors, estimator):
+    def __init__(self, df_target_val, predictors, estimator, n_splits=1):
         """
         Keywords arguments:
         df_target_val -- df of values to predict
@@ -115,7 +115,7 @@ def home():
 @app.route('/form')
 def form():
     form_title = 'form of the question'
-    nb_cols = 80
+    nb_cols = 55
     return render_template('form.html', form_title=form_title, nb_cols=nb_cols)
 
 # %%
