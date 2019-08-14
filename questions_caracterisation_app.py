@@ -13,7 +13,6 @@ import pandas as pd
 import numpy as np
 import pickle
 
-from nltk import RegexpTokenizer
 from flask import Flask, render_template, request
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import model_selection as model_selection
@@ -43,7 +42,11 @@ import data_cleaning_categorisation as clean
 # nltk.download('punkt')
 PATH_DATA = './data/'
 nan = NAN = np.nan  # WHoa!!
-tokenizer = RegexpTokenizer(r'[\w+(?=+)]*')
+
+# %%
+# loading
+with open(PATH_DATA + 'tokenizer.pkl', 'rb') as p:
+    tokenizer = pickle.load(p)
 
 
 # %%
